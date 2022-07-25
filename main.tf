@@ -3,6 +3,10 @@ resource "aws_vpc" "my_vpc" {
 
   tags = {
 
+    Schedule       = "seattle-office-hours"
+    env            = "$${env:GITHUB_HEAD_REF}"
+    team_ownership = "sre"
+    yor_trace      = "3bac9b6b-bc1e-4002-a017-0d2e162a59d2"
   }
 }
 
@@ -13,6 +17,17 @@ resource "aws_subnet" "my_subnet" {
 
   tags = {
 
+    Schedule             = "seattle-office-hours"
+    env                  = "$${env:GITHUB_HEAD_REF}"
+    git_commit           = "781e74672b7cc4ef66538d8de3d6466f6c943d45"
+    git_file             = "main.tf"
+    git_last_modified_at = "2022-07-25 02:22:17"
+    git_last_modified_by = "leosaragih001@gmil.com"
+    git_modifiers        = "leosaragih001"
+    git_org              = "saktil"
+    git_repo             = "ec2"
+    team_ownership       = "sre"
+    yor_trace            = "89a8a89c-6280-4275-adf1-6a93132ace1a"
   }
 }
 
@@ -22,6 +37,17 @@ resource "aws_network_interface" "foo" {
 
   tags = {
 
+    Schedule             = "seattle-office-hours"
+    env                  = "$${env:GITHUB_HEAD_REF}"
+    git_commit           = "781e74672b7cc4ef66538d8de3d6466f6c943d45"
+    git_file             = "main.tf"
+    git_last_modified_at = "2022-07-25 02:22:17"
+    git_last_modified_by = "leosaragih001@gmil.com"
+    git_modifiers        = "leosaragih001"
+    git_org              = "saktil"
+    git_repo             = "ec2"
+    team_ownership       = "sre"
+    yor_trace            = "2f52e149-fde7-4b74-9bed-ea4e76783b02"
   }
 }
 
@@ -35,6 +61,17 @@ resource "aws_instance" "foo" {
   }
   tags = {
 
+    Schedule             = "seattle-office-hours"
+    env                  = "$${env:GITHUB_HEAD_REF}"
+    git_commit           = "73f19553827031038c14131855be06b1a50c1265"
+    git_file             = "main.tf"
+    git_last_modified_at = "2022-07-25 08:03:31"
+    git_last_modified_by = "leosaragih001@gmil.com"
+    git_modifiers        = "leosaragih001"
+    git_org              = "saktil"
+    git_repo             = "ec2"
+    team_ownership       = "sre"
+    yor_trace            = "2875ce7a-91c4-4d6f-9f76-52a9a13439dd"
   }
 
 }

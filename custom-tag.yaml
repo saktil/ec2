@@ -3,7 +3,7 @@ tag_groups:
     tags:
       - name: env
         value:
-          default: ${env:GITHUB_HEAD_REF} # environment name would be the name of the feature_branch
+          default: master # environment name would be the name of the feature_branch
       - name: Schedule
         value:
           default: seattle-office-hours
@@ -14,14 +14,11 @@ tag_groups:
             - security_engineering:
                 tags:
                   git_modifiers: # security engineering team member's GitHub handles
-                    - rotemavni
-                    - tronxd
-                    - nimrodkor
+                    - leo
             - platform_engineering:
                 tags:
                   git_modifiers: # platform engineering team member's GitHub handles
-                    - milkana
-                    - nofar
+                    - sakti
             - application:
                 tags:
                   git_modifiers:
