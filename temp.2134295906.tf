@@ -7,7 +7,6 @@ resource "aws_vpc" "my_vpc" {
     env            = "$${env:GITHUB_HEAD_REF}"
     team_ownership = "sre"
     yor_trace      = "69337982-cce6-49ef-a69d-79227aba0e30"
-    update         = "update-lagi"
   }
 }
 
@@ -28,8 +27,7 @@ resource "aws_subnet" "my_subnet" {
     git_repo             = "ec2"
     team_ownership       = "sre"
     yor_trace            = "1cf74650-7dd4-44d5-a52c-02926eb1e48e"
-    env                  = "$${env:GITHUB_HEAD_REF}"
-    update               = "update-lagi"
+    env                  = "${env:GITHUB_HEAD_REF}"
   }
 }
 
@@ -49,8 +47,7 @@ resource "aws_network_interface" "foo" {
     git_repo             = "ec2"
     team_ownership       = "sre"
     yor_trace            = "4725aa1b-f15c-4f74-af25-a0ae097bb0d1"
-    env                  = "$${env:GITHUB_HEAD_REF}"
-    update               = "update-lagi"
+    env                  = "${env:GITHUB_HEAD_REF}"
   }
 }
 
@@ -75,7 +72,6 @@ resource "aws_instance" "foo" {
     git_repo             = "ec2"
     team_ownership       = "sre"
     yor_trace            = "a37b4bb5-0fe4-4dc9-bca4-e02a9d2b2e2e"
-    update               = "update-lagi"
   }
 
 }
