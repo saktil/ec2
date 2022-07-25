@@ -1,0 +1,14 @@
+tag_groups:
+  - name: ownership 
+    tags:
+      - name: env
+        value:
+          default: master 
+      - name: team_ownership
+        value:
+          default: sre-intern
+      - name: Schedule
+        value:
+          default: seattle-office-hours
+
+      
