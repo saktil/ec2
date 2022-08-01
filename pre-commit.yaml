@@ -3,7 +3,7 @@
     hooks:
       - id: yor
         name: yor
-        entry: yor tag -d
+        entry: yor tag -d . --config-file custom-tag.yaml
         args: ["."]
         language: golang
         types: [terraform]
