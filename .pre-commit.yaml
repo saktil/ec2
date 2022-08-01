@@ -2,7 +2,7 @@
     rev: 0.1.143
     hooks:
       - id: yor
-        name: yor
+        name: yor-test
         entry: yor tag -d . --config-file custom-tag.yaml
         args: ["."]
         language: golang
