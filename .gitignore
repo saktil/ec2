@@ -1,4 +1,66 @@
-.terraform*
-terraform*
-provider*
+.terraform
+.terraform.lock.hcl
+
+# Additional Terraform-related entries
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+crash.log
+crash.*.log
+# Local .terraform directories
 .terraform/
+
+# Terraform State files
+*.tfstate
+*.tfstate.*
+
+# backend and providers
+backend.tf
+provider.tf
+
+# locals file
+locals.tf
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Ignore override files as they are usually used to override resources locally.
+# These are not needed in your source control.
+*.tfvars
+*.tfvars.json
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# Sensitive data files
+*.auto.tfvars
+*.auto.tfvars.json
+
+# Lock file to prevent concurrent modifications
+.terraform.lock.hcl
+
+# plan output
+tfplan
+
+# .env files containing sensitive environment variables
+.env
+
+.*.sw?
+.idea
+terragrunt.iml
+vendor
+.terraform
+.vscode
+*.tfstate
+*.tfstate.backup
+*.out
+.terragrunt-cache
+.bundle
+.ruby-version
+.terraform.lock.hcl
+terragrunt
+.DS_Store
+mocks/
