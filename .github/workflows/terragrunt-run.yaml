@@ -1,15 +1,16 @@
-name: 'Terragrunt Plan Dong'
+name: 'Terragrunt CI/CD Pipeline'
+
 on:
   push:
     branches:
-      - main
+      - master
     paths:
-      - 'infra/terrafrom/dev/**'
+      - 'ec2/instance/**'
   pull_request:
     branches:
-      - main
+      - master
     paths:
-      - 'infra/terraform/dev/**'
+      - '/ec2/instance/**'
 
 env:
   tf_version: '1.9.5'
@@ -24,18 +25,21 @@ permissions:
 
 jobs:
   terragrunt:
-    name: 'Terragrunt dev'
+    name: 'Terragrunt CI/CD'
     runs-on: ubuntu-latest
     steps:
+      # Step 1: Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Step 2: Configure AWS credentials using OIDC
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::975050366595:role/github-actions-ec2-role
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ env.aws_region }}
 
+      # Step 3: Initialize Terragrunt
       - name: Init
         uses: gruntwork-io/terragrunt-action@v2
         with:
@@ -44,8 +48,9 @@ jobs:
           tg_dir: infra/terraform
           tg_command: 'run-all init'
 
+      # Step 4: Check Terragrunt formatting
       - name: Terragrunt Format
-        working-directory: ${{ env.TF_WORKING_DIR }}
+        working-directory: ${{ env.working_dir }}
         run: |
           echo "Checking if Terragrunt files are formatted correctly..."
           if ! terragrunt fmt -check; then
@@ -54,6 +59,7 @@ jobs:
             exit 1
           fi
 
+      # Step 5: Validate Terragrunt configuration
       - name: Validate
         uses: gruntwork-io/terragrunt-action@v2
         with:
@@ -62,6 +68,7 @@ jobs:
           tg_dir: infra/terraform
           tg_command: 'run-all validate'
 
+      # Step 6: Plan Terragrunt changes
       - name: Plan
         uses: gruntwork-io/terragrunt-action@v2
         with:
@@ -69,11 +76,12 @@ jobs:
           tg_version: ${{ env.tg_version }}
           tg_dir: infra/terraform
           tg_command: 'run-all plan'
-        
+
+      # Step 7: Apply Terragrunt changes (only on push to main)
       - name: Apply
         uses: gruntwork-io/terragrunt-action@v2
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        working-directory: ${{ env.TF_WORKING_DIR }}
+        working-directory: ${{ env.working_dir }}
         with:
           tf_version: ${{ env.tf_version }}
           tg_version: ${{ env.tg_version }}
