@@ -1,59 +1,89 @@
-name: 'Terragrunt Plan and apply'
+name: 'Terragrunt CI/CD Pipeline'
+
 on:
   push:
     branches:
       - master
     paths:
-      - '/ec2/**'
+      - 'ec2/instance/**'
+  pull_request:
     branches:
-      - master
-    path:
-      - '/instance/**'
+      - f/new-terragrunt-pipeline
+    paths:
+      - '/ec2/instance/**'
 
 env:
   tf_version: '1.9.5'
   tg_version: '0.67.0'
   aws_region: 'ap-southeast-3'
-  working_dir: 'ec2/instance' 
+  working_dir: './infra/terraform/dev'
 
 permissions:
-  contents: read
   id-token: write
-  pull-requests: write
+  contents: read
+  pull_requests: write
 
-jpbs: 
+jobs:
   terragrunt:
-    name: 'Terragrunt Plan and Apply'
+    name: 'Terragrunt CI/CD'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      # Step 1: Checkout the repository
+      - name: Checkout repository
         uses: actions/checkout@v4
-      
-      - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.aws_region }}
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: ${{ env.tf_version }}
-
-      - name: Set up Terragrunt
-        uses: autero1/setup-terragrunt@v2
-        with:
-          terragrunt_version: ${{ env.tg_version }}
-
+      # Step 2: Configure AWS credentials using OIDC
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: arn:aws:iam::975050366595:role/github-actions-ec2-role
           aws-region: ${{ env.aws_region }}
 
-      - name: Terragrunt Plan
+      # Step 3: Initialize Terragrunt
+      - name: Init
+        uses: gruntwork-io/terragrunt-action@v2
+        with:
+          tf_version: ${{ env.tf_version }}
+          tg_version: ${{ env.tg_version }}
+          tg_dir: infra/terraform
+          tg_command: 'run-all init'
+
+      # Step 4: Check Terragrunt formatting
+      - name: Terragrunt Format
+        working-directory: ${{ env.working_dir }}
         run: |
-          cd ${{ env.working_dir }}
-          terragrunt plan --terragrunt-non-interactive --terragrunt-working-dir ${{ env.working_dir }} --terragrunt-include-external-dependencies --terragrunt-config-file terragrunt.hcl
+          echo "Checking if Terragrunt files are formatted correctly..."
+          if ! terragrunt fmt -check; then
+            echo "Error: Terragrunt files are not formatted correctly."
+            echo "Run 'terragrunt fmt' to fix the formatting."
+            exit 1
+          fi
+
+      # Step 5: Validate Terragrunt configuration
+      - name: Validate
+        uses: gruntwork-io/terragrunt-action@v2
+        with:
+          tf_version: ${{ env.tf_version }}
+          tg_version: ${{ env.tg_version }}
+          tg_dir: infra/terraform
+          tg_command: 'run-all validate'
+
+      # Step 6: Plan Terragrunt changes
+      - name: Plan
+        uses: gruntwork-io/terragrunt-action@v2
+        with:
+          tf_version: ${{ env.tf_version }}
+          tg_version: ${{ env.tg_version }}
+          tg_dir: infra/terraform
+          tg_command: 'run-all plan'
+
+      # Step 7: Apply Terragrunt changes (only on push to main)
+      # - name: Apply
+      #   uses: gruntwork-io/terragrunt-action@v2
+      #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      #   working-directory: ${{ env.working_dir }}
+      #   with:
+      #     tf_version: ${{ env.tf_version }}
+      #     tg_version: ${{ env.tg_version }}
+      #     tg_dir: infra/terraform
+      #     tg_command: 'run-all apply --auto-approve'
