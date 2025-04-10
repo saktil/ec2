@@ -8,7 +8,7 @@ on:
       - 'ec2/instance/**'
   pull_request:
     branches:
-      - master
+      - f/new-terragrunt-pipeline
     paths:
       - '/ec2/instance/**'
 
@@ -78,12 +78,12 @@ jobs:
           tg_command: 'run-all plan'
 
       # Step 7: Apply Terragrunt changes (only on push to main)
-      - name: Apply
-        uses: gruntwork-io/terragrunt-action@v2
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        working-directory: ${{ env.working_dir }}
-        with:
-          tf_version: ${{ env.tf_version }}
-          tg_version: ${{ env.tg_version }}
-          tg_dir: infra/terraform
-          tg_command: 'run-all apply --auto-approve'
+      # - name: Apply
+      #   uses: gruntwork-io/terragrunt-action@v2
+      #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      #   working-directory: ${{ env.working_dir }}
+      #   with:
+      #     tf_version: ${{ env.tf_version }}
+      #     tg_version: ${{ env.tg_version }}
+      #     tg_dir: infra/terraform
+      #     tg_command: 'run-all apply --auto-approve'
