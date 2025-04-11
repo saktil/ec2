@@ -10,13 +10,23 @@ on:
     branches:
       - f/new-terragrunt-pipeline
     paths:
-      - '/ec2/instance/**'
+
+      - 'ec2/instance/**'
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform (plan/apply/destroy)'
+        required: true
+        default: 'plan'
+
 
 env:
   tf_version: '1.9.5'
   tg_version: '0.67.0'
   aws_region: 'ap-southeast-3'
-  working_dir: './infra/terraform/dev'
+
+  working_dir: 'ec2/instance'
+
 
 permissions:
   id-token: write
@@ -39,51 +49,51 @@ jobs:
           role-to-assume: arn:aws:iam::975050366595:role/github-actions-ec2-role
           aws-region: ${{ env.aws_region }}
 
-      # Step 3: Initialize Terragrunt
-      - name: Init
-        uses: gruntwork-io/terragrunt-action@v2
+      # Step 3: Install Terraform and Terragrunt
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
         with:
-          tf_version: ${{ env.tf_version }}
-          tg_version: ${{ env.tg_version }}
-          tg_dir: infra/terraform
-          tg_command: 'run-all init'
+          terraform_version: ${{ env.tf_version }}
+      
+      - name: Install Terragrunt
+        run: |
+          wget -O /tmp/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.tg_version }}/terragrunt_linux_amd64"
+          chmod +x /tmp/terragrunt
+          sudo mv /tmp/terragrunt /usr/local/bin/terragrunt
 
-      # Step 4: Check Terragrunt formatting
+      # Step 4: Initialize Terragrunt
+      - name: Initialize Terragrunt
+        working-directory: ${{ env.working_dir }}
+        run: terragrunt init
+
+      # Step 5: Check Terragrunt formatting
       - name: Terragrunt Format
         working-directory: ${{ env.working_dir }}
         run: |
           echo "Checking if Terragrunt files are formatted correctly..."
-          if ! terragrunt fmt -check; then
-            echo "Error: Terragrunt files are not formatted correctly."
-            echo "Run 'terragrunt fmt' to fix the formatting."
-            exit 1
-          fi
+          terragrunt hclfmt -check || (echo "Error: Terragrunt files are not formatted correctly. Run 'terragrunt hclfmt' to fix." && exit 1)
 
-      # Step 5: Validate Terragrunt configuration
+      # Step 6: Validate Terragrunt configuration
       - name: Validate
-        uses: gruntwork-io/terragrunt-action@v2
-        with:
-          tf_version: ${{ env.tf_version }}
-          tg_version: ${{ env.tg_version }}
-          tg_dir: infra/terraform
-          tg_command: 'run-all validate'
+        working-directory: ${{ env.working_dir }}
+        run: terragrunt validate
 
-      # Step 6: Plan Terragrunt changes
+      # Step 7: Plan Terragrunt changes
       - name: Plan
-        uses: gruntwork-io/terragrunt-action@v2
-        with:
-          tf_version: ${{ env.tf_version }}
-          tg_version: ${{ env.tg_version }}
-          tg_dir: infra/terraform
-          tg_command: 'run-all plan'
+        working-directory: ${{ env.working_dir }}
+        run: |
+          terragrunt plan -out=tfplan
+          echo "Plan completed successfully!"
 
-      # Step 7: Apply Terragrunt changes (only on push to main)
-      # - name: Apply
-      #   uses: gruntwork-io/terragrunt-action@v2
-      #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      #   working-directory: ${{ env.working_dir }}
-      #   with:
-      #     tf_version: ${{ env.tf_version }}
-      #     tg_version: ${{ env.tg_version }}
-      #     tg_dir: infra/terraform
-      #     tg_command: 'run-all apply --auto-approve'
+      # Step 8: Apply Terragrunt changes (only on push to master or when manually triggered)
+      - name: Apply
+        if: (github.ref == 'refs/heads/master' && github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
+        working-directory: ${{ env.working_dir }}
+        run: terragrunt apply -auto-approve tfplan
+
+      # Step 9: Destroy resources (only when manually triggered)
+      - name: Destroy
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+        working-directory: ${{ env.working_dir }}
+        run: terragrunt destroy -auto-approve
+
