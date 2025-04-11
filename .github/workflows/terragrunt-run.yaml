@@ -10,6 +10,7 @@ on:
     branches:
       - f/new-terragrunt-pipeline
     paths:
+
       - 'ec2/instance/**'
   workflow_dispatch:
     inputs:
@@ -18,11 +19,14 @@ on:
         required: true
         default: 'plan'
 
+
 env:
   tf_version: '1.9.5'
   tg_version: '0.67.0'
   aws_region: 'ap-southeast-3'
+
   working_dir: 'ec2/instance'
+
 
 permissions:
   id-token: write
@@ -92,3 +96,4 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
         working-directory: ${{ env.working_dir }}
         run: terragrunt destroy -auto-approve
+
