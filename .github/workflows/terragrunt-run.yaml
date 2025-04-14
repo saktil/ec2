@@ -19,13 +19,11 @@ on:
         required: true
         default: 'plan'
 
-
 env:
   tf_version: '1.9.5'
   tg_version: '0.67.0'
   aws_region: 'ap-southeast-3'
-
-  working_dir: 'ec2/instance'
+  working_dir: 'project'
 
 
 permissions:
